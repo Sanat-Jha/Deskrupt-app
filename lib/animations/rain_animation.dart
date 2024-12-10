@@ -9,10 +9,10 @@ class RainBackgroundWidget extends StatefulWidget {
   final Widget imageWidget;
 
   const RainBackgroundWidget({
-    Key? key,
+    super.key,
     required this.child,
     required this.imageWidget,
-  }) : super(key: key);
+  });
 
   @override
   _RainBackgroundWidgetState createState() => _RainBackgroundWidgetState();

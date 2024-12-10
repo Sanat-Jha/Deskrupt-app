@@ -6,10 +6,10 @@ class BubbleBackgroundContainer extends StatefulWidget {
   final Widget backgroundImageWidget;
 
   const BubbleBackgroundContainer({
-    Key? key,
+    super.key,
     required this.child,
     required this.backgroundImageWidget,
-  }) : super(key: key);
+  });
 
   @override
   State<BubbleBackgroundContainer> createState() =>

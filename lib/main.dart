@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:deskrupt_app/bganimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +31,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("start");
     return const MaterialApp(
       home: Scaffold(
         body: Home(),
@@ -94,7 +94,8 @@ class _HomeState extends State<Home> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('deckData', jsonEncode(response));
       await prefs.setString('deckCode', deckCode);
-      await prefs.setString('base64Image', response['base64Image']);  // Store the base64 image
+      await prefs.setString(
+          'base64Image', response['base64Image']); // Store the base64 image
 
       setState(() {
         Phoenix.rebirth(context); // Refresh the app
@@ -130,7 +131,8 @@ class _HomeState extends State<Home> {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text("Invalid format! Please use username/decktitle."),
+                      content: Text(
+                          "Invalid format! Please use username/decktitle."),
                     ),
                   );
                 }
@@ -155,6 +157,12 @@ class _HomeState extends State<Home> {
           Map<String, dynamic> deck = snapshot.data as Map<String, dynamic>;
 
           String animation = deck['animation'] ?? 'default_animation';
+          Map<String, dynamic> shortcuts = {};
+          try{
+          shortcuts = deck['shortcuts'] ?? {};
+          }catch(e){
+          shortcuts = {};
+          }
 
           return KeyboardListener(
             focusNode: _focusNode,
@@ -167,6 +175,13 @@ class _HomeState extends State<Home> {
                 if (event.physicalKey == PhysicalKeyboardKey.shiftLeft ||
                     event.physicalKey == PhysicalKeyboardKey.shiftRight) {
                   isShiftPressed = true;
+                }
+                if (isCtrlPressed) {
+                  String keyPressed = event.logicalKey.keyLabel.toLowerCase();
+                  if (shortcuts.containsKey(keyPressed)) {
+                    String command = shortcuts[keyPressed]!;
+                    Process.run('cmd', ['/c', command]);
+                  }
                 }
 
                 if (isCtrlPressed &&
@@ -232,10 +247,12 @@ Future<Map<String, dynamic>> fetchDeck(String deckcode) async {
       String imageUrl = body['bgimageurl'];
 
       // Fetch the image data and encode it as a base64 string
-      var imageBytes = await Dio().get(imageUrl, options: Options(responseType: ResponseType.bytes));
+      var imageBytes = await Dio()
+          .get(imageUrl, options: Options(responseType: ResponseType.bytes));
       String base64Image = base64Encode(imageBytes.data);
 
-      body['base64Image'] = base64Image;  // Add base64 image to the response body
+      body['base64Image'] =
+          base64Image; // Add base64 image to the response body
 
       return body;
     } else {
